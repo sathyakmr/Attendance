@@ -1,0 +1,23 @@
+# Policy-as-code for the AI agent's decision gates.
+# Changing risk tolerance is a reviewable PR against this file, not a code change.
+version: 1
+
+anomaly_thresholds:
+  clear_below: 0.30       # rule_score < this -> auto CLEARED, no human review
+  review_below: 0.75      # this <= rule_score < high -> OPEN, NORMAL priority review
+  # rule_score >= review_below -> OPEN, HIGH priority review (per policy Section 4 SLA)
+
+regularization:
+  repeat_offender_window_days: 30
+  repeat_offender_threshold: 3    # more than N requests in window -> HIGH risk, escalate flag
+
+rules:
+  geo_jump_max_plausible_kmh: 150      # faster implied travel speed than this between consecutive events -> flag
+  same_device_window_seconds: 5        # two different employees on same device within this window -> possible buddy punching
+  frequency_baseline_days: 30          # lookback window for personal punch-frequency baseline
+  frequency_anomaly_ratio: 2.0         # today's count > baseline * ratio, or < baseline / ratio -> flag
+
+nl_query:
+  # Roles permitted to use the NL query interface (read-only)
+  allowed_roles: ["MANAGER", "HR_ADMIN", "SUPER_ADMIN"]
+  max_question_length: 500

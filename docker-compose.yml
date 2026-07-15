@@ -1,0 +1,165 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: attendance-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: attendance
+      POSTGRES_PASSWORD: attendance
+      POSTGRES_DB: attendance_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./services/attendance-service/init-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U attendance -d attendance_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  attendance-service:
+    build:
+      context: ./services/attendance-service
+      dockerfile: Dockerfile
+    container_name: attendance-service
+    restart: unless-stopped
+    environment:
+      ATTENDANCE_DATABASE_URL: "postgresql+psycopg2://attendance:attendance@postgres:5432/attendance_db"
+      ATTENDANCE_API_KEY: "dev-local-api-key"
+      ATTENDANCE_ENFORCE_GEOFENCE: "false"
+      ATTENDANCE_AI_AGENT_SERVICE_URL: "http://ai-agent-service:8003"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  identity-service:
+    build:
+      context: ./services/identity-service
+      dockerfile: Dockerfile
+    container_name: identity-service
+    restart: unless-stopped
+    environment:
+      IDENTITY_DATABASE_URL: "postgresql+psycopg2://attendance:attendance@postgres:5432/attendance_db"
+      IDENTITY_JWT_SECRET: "dev-only-change-me"
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  regularization-service:
+    build:
+      context: ./services/regularization-service
+      dockerfile: Dockerfile
+    container_name: regularization-service
+    restart: unless-stopped
+    environment:
+      REGULARIZATION_DATABASE_URL: "postgresql+psycopg2://attendance:attendance@postgres:5432/attendance_db"
+      REGULARIZATION_JWT_SECRET: "dev-only-change-me"
+      REGULARIZATION_ATTENDANCE_SERVICE_URL: "http://attendance-service:8000"
+      REGULARIZATION_ATTENDANCE_SERVICE_API_KEY: "dev-local-api-key"
+      REGULARIZATION_AI_AGENT_SERVICE_URL: "http://ai-agent-service:8003"
+      REGULARIZATION_AI_AGENT_SERVICE_API_KEY: "dev-local-api-key"
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      attendance-service:
+        condition: service_started
+
+  ai-agent-service:
+    build:
+      context: ./services/ai-agent-service
+      dockerfile: Dockerfile
+    container_name: ai-agent-service
+    restart: unless-stopped
+    environment:
+      AI_AGENT_DATABASE_URL: "postgresql+psycopg2://attendance:attendance@postgres:5432/attendance_db"
+      AI_AGENT_JWT_SECRET: "dev-only-change-me"
+      AI_AGENT_ATTENDANCE_SERVICE_URL: "http://attendance-service:8000"
+      AI_AGENT_ATTENDANCE_SERVICE_API_KEY: "dev-local-api-key"
+      # Optional — leave unset to run the agent in fully deterministic mode.
+      AI_AGENT_ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+    ports:
+      - "8003:8003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  reporting-service:
+    build:
+      context: ./services/reporting-service
+      dockerfile: Dockerfile
+    container_name: reporting-service
+    restart: unless-stopped
+    environment:
+      REPORTING_DATABASE_URL: "postgresql+psycopg2://attendance:attendance@postgres:5432/attendance_db"
+      REPORTING_ATTENDANCE_SERVICE_URL: "http://attendance-service:8000"
+      REPORTING_ATTENDANCE_SERVICE_API_KEY: "dev-local-api-key"
+      REPORTING_AI_AGENT_SERVICE_URL: "http://ai-agent-service:8003"
+      REPORTING_AI_AGENT_SERVICE_API_KEY: "dev-local-api-key"
+      # Optional real WhatsApp credentials — leave unset to run in MOCK mode.
+      REPORTING_WHATSAPP_ACCESS_TOKEN: "${WHATSAPP_ACCESS_TOKEN:-}"
+      REPORTING_WHATSAPP_PHONE_NUMBER_ID: "${WHATSAPP_PHONE_NUMBER_ID:-}"
+      REPORTING_WHATSAPP_TO_NUMBER: "${WHATSAPP_TO_NUMBER:-}"
+      REPORTING_WHATSAPP_APP_SECRET: "${WHATSAPP_APP_SECRET:-}"
+      REPORTING_WHATSAPP_WEBHOOK_VERIFY_TOKEN: "dev-local-verify-token"
+      # Fast cron defaults for local demo purposes — every 2 minutes for daily,
+      # so you can see the scheduler fire without waiting until 18:00.
+      # Override to real production schedules via env when deploying for real.
+      REPORTING_DAILY_REPORT_CRON: "${REPORTING_DAILY_REPORT_CRON:-0 18 * * *}"
+      REPORTING_WEEKLY_REPORT_CRON: "${REPORTING_WEEKLY_REPORT_CRON:-0 9 * * 1}"
+      REPORTING_MONTHLY_REPORT_CRON: "${REPORTING_MONTHLY_REPORT_CRON:-0 9 1 * *}"
+      REPORTING_SCHEDULER_ENABLED: "${REPORTING_SCHEDULER_ENABLED:-true}"
+    ports:
+      - "8004:8004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ai-agent-service:
+        condition: service_started
+
+  adminer:
+    image: adminer:latest
+    container_name: attendance-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./services/frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked into the static JS bundle at BUILD time by Vite — must point
+        # to wherever the browser (not other containers) can reach each
+        # backend service. In local Compose that's the same host-published
+        # ports used throughout this README's curl examples. Changing these
+        # requires a rebuild (`docker compose build frontend`), not just a
+        # restart, since they're compiled in rather than read at runtime.
+        VITE_IDENTITY_URL: "http://localhost:8001"
+        VITE_ATTENDANCE_URL: "http://localhost:8000"
+        VITE_REGULARIZATION_URL: "http://localhost:8002"
+        VITE_AGENT_URL: "http://localhost:8003"
+        VITE_REPORTING_URL: "http://localhost:8004"
+    container_name: attendance-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - attendance-service
+      - identity-service
+      - regularization-service
+      - ai-agent-service
+      - reporting-service
+
+volumes:
+  pg_data:

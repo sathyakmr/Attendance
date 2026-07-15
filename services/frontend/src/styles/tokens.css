@@ -1,0 +1,56 @@
+/* ==========================================================================
+   Design tokens — "Ledger" visual identity.
+
+   Subject: an enterprise attendance system built around a physical ledger /
+   time-punch card metaphor. Audience: office employees, managers, and HR
+   admins reading dense, timestamp-heavy data all day. The signature element
+   is the stamp badge (STATUS rendered like a rubber ink stamp, slightly
+   rotated) used for attendance/regularization/anomaly status throughout.
+   ========================================================================== */
+
+:root {
+  /* --- Color: cool ledger-paper background, ink navy for structure,
+     stamp-red / brass / ledger-green for status accents --- */
+  --color-paper: #EEF1EF;
+  --color-paper-raised: #FFFFFF;
+  --color-ink: #1B2A41;
+  --color-ink-soft: #4A5A72;
+  --color-rule: #D4D9D5;
+  --color-rule-strong: #B7BEB9;
+
+  --color-stamp-red: #B23A2E;
+  --color-stamp-red-bg: #F7E7E4;
+  --color-brass: #A6791F;
+  --color-brass-bg: #F5EBD4;
+  --color-ledger-green: #2F6E51;
+  --color-ledger-green-bg: #E3EEE7;
+  --color-slate-blue: #2E4B6B;
+  --color-slate-blue-bg: #E4EAF1;
+
+  /* --- Type --- */
+  --font-display: 'Roboto Slab', 'Georgia', serif;
+  --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+
+  /* --- Layout --- */
+  --sidebar-width: 232px;
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --shadow-card: 0 1px 2px rgba(27, 42, 65, 0.06), 0 1px 1px rgba(27, 42, 65, 0.04);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,576 @@
+@import './tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-paper);
+  background-image:
+    linear-gradient(var(--color-rule) 1px, transparent 1px);
+  background-size: 100% 32px;
+  background-attachment: local;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ruled-paper background is a subtle texture cue, not a functional grid —
+   card surfaces below sit on solid white so text stays fully legible. */
+
+a {
+  color: var(--color-slate-blue);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-slate-blue);
+  outline-offset: 2px;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0 0 var(--space-3) 0;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: 22px; }
+h2 { font-size: 17px; }
+h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-ink-soft); }
+
+.numeric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- App shell --- */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--color-ink);
+  color: #E8EBEE;
+  padding: var(--space-5) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-brand {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.sidebar-brand-mark {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background: var(--color-stamp-red);
+  border-radius: 50%;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sidebar-nav a {
+  color: #B8C2CE;
+  text-decoration: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sidebar-nav a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.sidebar-nav a.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: var(--space-4);
+  font-size: 12px;
+  color: #8B96A5;
+}
+
+.sidebar-footer .role-tag {
+  display: inline-block;
+  margin-top: var(--space-1);
+  color: #E8EBEE;
+  font-weight: 600;
+}
+
+.sidebar-logout {
+  background: none;
+  border: none;
+  color: #B8C2CE;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12px;
+  margin-top: var(--space-2);
+  text-decoration: underline;
+}
+
+.main {
+  flex: 1;
+  padding: var(--space-6) var(--space-7);
+  max-width: 1180px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-5);
+}
+
+.page-header p {
+  color: var(--color-ink-soft);
+  margin: 0;
+  font-size: 13px;
+}
+
+/* --- Cards --- */
+
+.card {
+  background: var(--color-paper-raised);
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.card-row {
+  display: flex;
+  gap: var(--space-5);
+}
+
+.card-row > .card {
+  flex: 1;
+}
+
+.stat-block .stat-value {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--color-ink);
+  line-height: 1;
+}
+
+.stat-block .stat-label {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: var(--space-2);
+}
+
+/* --- Table --- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-soft);
+  font-weight: 600;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 2px solid var(--color-rule-strong);
+}
+
+tbody td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-rule);
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: rgba(27, 42, 65, 0.02);
+}
+
+/* --- Signature element: the stamp badge ---
+   Status is rendered like a rubber ink stamp: bordered, uppercase,
+   letter-spaced, and rotated very slightly, as if pressed by hand. */
+
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid currentColor;
+  transform: rotate(-1.2deg);
+  white-space: nowrap;
+}
+
+.stamp--validated { color: var(--color-ledger-green); background: var(--color-ledger-green-bg); }
+.stamp--pending    { color: var(--color-brass); background: var(--color-brass-bg); }
+.stamp--flagged    { color: var(--color-stamp-red); background: var(--color-stamp-red-bg); transform: rotate(1.5deg); }
+.stamp--rejected   { color: var(--color-stamp-red); background: var(--color-stamp-red-bg); transform: rotate(1.5deg); }
+.stamp--approved   { color: var(--color-ledger-green); background: var(--color-ledger-green-bg); }
+.stamp--escalated  { color: var(--color-stamp-red); background: var(--color-stamp-red-bg); transform: rotate(-1.8deg); }
+.stamp--neutral    { color: var(--color-ink-soft); background: var(--color-rule); }
+.stamp--sent, .stamp--delivered, .stamp--read { color: var(--color-slate-blue); background: var(--color-slate-blue-bg); }
+
+/* --- Buttons --- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-ink);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) { background: #2A3D59; }
+
+.btn-approve {
+  background: var(--color-ledger-green-bg);
+  color: var(--color-ledger-green);
+  border-color: var(--color-ledger-green);
+}
+.btn-approve:hover:not(:disabled) { background: #d3e8db; }
+
+.btn-reject {
+  background: var(--color-stamp-red-bg);
+  color: var(--color-stamp-red);
+  border-color: var(--color-stamp-red);
+}
+.btn-reject:hover:not(:disabled) { background: #f0d4d0; }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-rule-strong);
+}
+.btn-secondary:hover:not(:disabled) { background: var(--color-paper); }
+
+/* --- Forms --- */
+
+.field {
+  margin-bottom: var(--space-4);
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--color-ink);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 72px;
+  font-family: var(--font-body);
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--color-slate-blue);
+}
+
+/* --- Misc --- */
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-7) var(--space-4);
+  color: var(--color-ink-soft);
+}
+
+.error-banner {
+  background: var(--color-stamp-red-bg);
+  color: var(--color-stamp-red);
+  border: 1px solid var(--color-stamp-red);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-size: 13px;
+  margin-bottom: var(--space-4);
+}
+
+.success-banner {
+  background: var(--color-ledger-green-bg);
+  color: var(--color-ledger-green);
+  border: 1px solid var(--color-ledger-green);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-size: 13px;
+  margin-bottom: var(--space-4);
+}
+
+.muted { color: var(--color-ink-soft); font-size: 12px; }
+
+.priority-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: var(--space-2);
+}
+.priority-dot--HIGH { background: var(--color-stamp-red); }
+.priority-dot--NORMAL { background: var(--color-brass); }
+.priority-dot--LOW { background: var(--color-rule-strong); }
+
+/* ==========================================================================
+   HR Dashboard additions (summary card grid, live feed, history filters/
+   pagination, employee detail drawer). Appended — nothing above this line
+   was changed.
+   ========================================================================== */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.card-grid .card {
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-block.loading .stat-value {
+  color: var(--color-rule-strong);
+}
+
+/* --- Live activity feed --- */
+
+.live-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.live-feed-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-1);
+  border-bottom: 1px solid var(--color-rule);
+  font-size: 13px;
+}
+
+.live-feed-row:last-child {
+  border-bottom: none;
+}
+
+.live-feed-time {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-soft);
+  width: 64px;
+  flex-shrink: 0;
+}
+
+.live-feed-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.live-feed-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-ledger-green);
+  flex-shrink: 0;
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* --- Search / filter bar --- */
+
+.filter-bar {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+  align-items: flex-end;
+}
+
+.filter-bar .field {
+  margin-bottom: 0;
+  min-width: 160px;
+}
+
+.filter-bar input, .filter-bar select {
+  padding: 7px 10px;
+}
+
+/* --- Pagination --- */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+  font-size: 12px;
+  color: var(--color-ink-soft);
+}
+
+.pagination-controls {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* --- Clickable table rows (history table, directory) --- */
+
+.row-clickable {
+  cursor: pointer;
+}
+
+.row-clickable:hover {
+  background: var(--color-slate-blue-bg) !important;
+}
+
+/* --- Employee detail drawer --- */
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(27, 42, 65, 0.35);
+  z-index: 40;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 420px;
+  max-width: 92vw;
+  background: var(--color-paper-raised);
+  box-shadow: -8px 0 30px rgba(27, 42, 65, 0.25);
+  z-index: 41;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-5);
+}
+
+.drawer-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--color-ink-soft);
+  line-height: 1;
+  padding: 4px;
+}
+
+.drawer-close:hover {
+  color: var(--color-ink);
+}
+
+.drawer-field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.drawer-field-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-soft);
+  margin-bottom: 2px;
+}
+
+.drawer-field-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.drawer-field-value.numeric {
+  font-family: var(--font-mono);
+}
+
